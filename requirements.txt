@@ -4,3 +4,7 @@ pillow
 numpy
 scikit-learn
 matplotlib
+streamlit
+tensorflow-cpu
+pillow
+numpy
