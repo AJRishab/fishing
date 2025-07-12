@@ -1,38 +1,35 @@
 import streamlit as st
-from PIL import Image
 import numpy as np
-import tensorflow as tf
+import pandas as pd
+from tensorflow.keras.models import load_model
 
-# Load the trained model
+# Load the model
 @st.cache_resource
-def load_model():
-    model = tf.keras.models.load_model("illegal_fishing_model.h5")
+def load_illegal_fishing_model():
+    model = load_model("model/InceptionTime_best_model.h5")
     return model
 
-model = load_model()
+model = load_illegal_fishing_model()
 
-# Replace with your actual class names
-class_names = ['Class A', 'Class B', 'Class C']
+st.title("🌊 Illegal Fishing Detection System")
+st.write("Upload sensor time-series data to detect illegal fishing activity using InceptionTime model.")
 
-# App title
-st.title("🧠 Image Classifier")
+uploaded_file = st.file_uploader("Upload CSV File", type=["csv"])
 
-# Image upload section
-uploaded_file = st.file_uploader("Upload an Image", type=["jpg", "jpeg", "png"])
+if uploaded_file:
+    try:
+        data = pd.read_csv(uploaded_file)
+        st.write("Uploaded Data Preview:")
+        st.dataframe(data.head())
 
-if uploaded_file is not None:
-    image = Image.open(uploaded_file)
-    st.image(image, caption="Uploaded Image", use_column_width=True)
+        # Data Preprocessing (adjust this part based on your model's expected input)
+        input_data = np.array(data).astype(np.float32)
+        input_data = np.expand_dims(input_data, axis=0)  # shape: (1, timesteps, features)
 
-    # Preprocess image
-    image_resized = image.resize((224, 224))  # Change size if your model uses a different one
-    img_array = np.array(image_resized) / 255.0
-    img_array = np.expand_dims(img_array, axis=0)
+        # Predict
+        prediction = model.predict(input_data)
+        predicted_class = np.argmax(prediction, axis=1)[0]
 
-    # Make prediction
-    prediction = model.predict(img_array)
-    predicted_class = class_names[np.argmax(prediction)]
-
-    # Show result
-    st.subheader("Prediction:")
-    st.success(f"Predicted class: {predicted_class}")
+        st.success(f"Prediction: {'Illegal Activity Detected' if predicted_class == 1 else 'No Illegal Activity'}")
+    except Exception as e:
+        st.error(f"Error: {str(e)}")
