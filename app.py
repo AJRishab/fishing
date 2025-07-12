@@ -6,7 +6,7 @@ from tensorflow.keras.models import load_model
 # Load the model
 @st.cache_resource
 def load_illegal_fishing_model():
-    model = load_model("model/InceptionTime_best_model.h5")
+    model = load_model("model/illegal_fishing_model.h5")
     return model
 
 model = load_illegal_fishing_model()
