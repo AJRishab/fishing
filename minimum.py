@@ -3,32 +3,36 @@ from PIL import Image
 import numpy as np
 import tensorflow as tf
 
-# Load your saved model
-model = tf.keras.models.load_model("illegal_fishing_model.h5")
+# Load the trained model
+@st.cache_resource
+def load_model():
+    model = tf.keras.models.load_model("your_model.h5")
+    return model
 
-# Class labels (edit based on your model)
+model = load_model()
+
+# Replace with your actual class names
 class_names = ['Class A', 'Class B', 'Class C']
 
-# Title
-st.title("🧠 Image Analyzer with ML Model")
+# App title
+st.title("🧠 Image Classifier")
 
-# Image uploader
+# Image upload section
 uploaded_file = st.file_uploader("Upload an Image", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
-    # Show the uploaded image
     image = Image.open(uploaded_file)
-    st.image(image, caption='Uploaded Image', use_column_width=True)
+    st.image(image, caption="Uploaded Image", use_column_width=True)
 
-    # Preprocess the image (resize based on model input)
-    image_resized = image.resize((224, 224))  # change size to match your model input
-    img_array = np.array(image_resized) / 255.0  # normalize if needed
-    img_array = np.expand_dims(img_array, axis=0)  # add batch dimension
+    # Preprocess image
+    image_resized = image.resize((224, 224))  # Change size if your model uses a different one
+    img_array = np.array(image_resized) / 255.0
+    img_array = np.expand_dims(img_array, axis=0)
 
-    # Predict
-    predictions = model.predict(img_array)
-    predicted_class = class_names[np.argmax(predictions)]
+    # Make prediction
+    prediction = model.predict(img_array)
+    predicted_class = class_names[np.argmax(prediction)]
 
-    # Output
+    # Show result
     st.subheader("Prediction:")
-    st.success(f"Predicted Class: {predicted_class}")
+    st.success(f"Predicted class: {predicted_class}")
